@@ -1275,5 +1275,72 @@
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
 </script>
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+  // Ta config Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCaH7brB_Ww0aKBJy7ah7zziZ5sKsMpwHI",
+    authDomain: "sdis05-project.firebaseapp.com",
+    projectId: "sdis05-project",
+    storageBucket: "sdis05-project.firebasestorage.app",
+    messagingSenderId: "443744303234",
+    appId: "1:443744303234:web:f349ab16dab80542b39c9b",
+    measurementId: "G-8463WSNVVC"
+  };
+
+  // Initialise Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const vehiculesCol = collection(db, "vehicules");
+
+  // Fonction pour ajouter un véhicule
+  async function ajouterVehicule(vehicule) {
+    try {
+      const docRef = await addDoc(vehiculesCol, vehicule);
+      console.log("Véhicule ajouté avec ID: ", docRef.id);
+    } catch (e) {
+      console.error("Erreur ajout véhicule: ", e);
+    }
+  }
+
+  // Fonction pour afficher la liste des véhicules
+  function afficherVehicules(vehicules) {
+    const liste = document.getElementById("liste-vehicules");
+    liste.innerHTML = ""; // Vide la liste
+
+    vehicules.forEach(v => {
+      const li = document.createElement("li");
+      li.textContent = `${v.marque} ${v.modele} (${v.immatriculation})`;
+
+      // Bouton supprimer
+      const btnSuppr = document.createElement("button");
+      btnSuppr.textContent = "Supprimer";
+      btnSuppr.onclick = async () => {
+        await deleteDoc(doc(db, "vehicules", v.id));
+      };
+      li.appendChild(btnSuppr);
+
+      liste.appendChild(li);
+    });
+  }
+
+  // Écoute en temps réel des véhicules
+  onSnapshot(vehiculesCol, (snapshot) => {
+    const vehicules = [];
+    snapshot.forEach(doc => {
+      vehicules.push({ id: doc.id, ...doc.data() });
+    });
+    afficherVehicules(vehicules);
+  });
+
+  // Exemple : quand tu as un formulaire, appeler cette fonction avec les données
+  // Par exemple :
+  // ajouterVehicule({ marque: "Peugeot", modele: "208", immatriculation: "AB-123-CD" });
+
+  // Tu peux lier ajouterVehicule à ton formulaire dans ton JS
+</script>
 </body>
 </html>
