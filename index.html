@@ -637,7 +637,6 @@
         
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            chargerDonnees();
             mettreAJourTableaux();
             mettreAJourDashboard();
             document.getElementById('date-bc').value = new Date().toISOString().split('T')[0];
@@ -659,31 +658,32 @@
         }
         
         // Fonctions véhicules
-        function ajouterVehicule() {
-            const vehicule = {
-                id: Date.now(),
-                indicatif: document.getElementById('indicatif').value,
-                type: document.getElementById('type').value,
-                marque: document.getElementById('marque').value,
-                modele: document.getElementById('modele').value,
-                annee: document.getElementById('annee').value,
-                kilometrage: document.getElementById('kilometrage').value,
-                statut: document.getElementById('statut').value,
-                caserne: document.getElementById('caserne').value,
-                dateAjout: new Date().toISOString().split('T')[0]
-            };
-            
-            if (!vehicule.indicatif || !vehicule.type) {
-                alert('Veuillez remplir au minimum l\'indicatif et le type');
-                return;
-            }
-            
-            vehicules.push(vehicule);
-            sauvegarderDonnees();
-            mettreAJourTableaux();
-            viderFormulaireVehicule();
-            alert('Véhicule ajouté avec succès');
-        }
+       async function ajouterVehicule() {
+    const vehicule = {
+        indicatif: document.getElementById('indicatif').value,
+        type: document.getElementById('type').value,
+        marque: document.getElementById('marque').value,
+        modele: document.getElementById('modele').value,
+        annee: parseInt(document.getElementById('annee').value),
+        kilometrage: parseInt(document.getElementById('kilometrage').value),
+        statut: document.getElementById('statut').value,
+        caserne: document.getElementById('caserne').value,
+        dateAjout: new Date().toISOString().split('T')[0]
+    };
+
+    if (!vehicule.indicatif || !vehicule.type) {
+        alert("Veuillez remplir au minimum l'indicatif et le type");
+        return;
+    }
+
+    try {
+        await addDoc(collection(db, "vehicules"), vehicule); // 👉 enregistre dans Firestore
+        viderFormulaireVehicule();
+        alert("Véhicule ajouté avec succès");
+    } catch (e) {
+        console.error("Erreur ajout véhicule: ", e);
+    }
+}
         
         function viderFormulaireVehicule() {
             document.getElementById('indicatif').value = '';
@@ -714,7 +714,6 @@
             }
             
             interventions.push(intervention);
-            sauvegarderDonnees();
             mettreAJourTableaux();
             viderFormulaireIntervention();
             alert('Intervention ajoutée avec succès');
@@ -735,7 +734,6 @@
                 if (nouveauStatut === 'Terminée') {
                     intervention.dateTerminee = new Date().toISOString().split('T')[0];
                 }
-                sauvegarderDonnees();
                 mettreAJourTableaux();
             }
         }
@@ -841,7 +839,6 @@
             
             bonCommandes.push(bc);
             nextBCNum++;
-            sauvegarderDonnees();
             mettreAJourTableaux();
             nouveauBC();
             alert('Bon de commande enregistré avec succès');
@@ -861,7 +858,6 @@
             const bc = bonCommandes.find(b => b.id === id);
             if (bc) {
                 bc.statut = nouveauStatut;
-                sauvegarderDonnees();
                 mettreAJourTableaux();
             }
         }
@@ -1109,7 +1105,6 @@
                 
                 // Supprimer l'ancien véhicule pour permettre la modification
                 vehicules = vehicules.filter(v => v.id !== id);
-                sauvegarderDonnees();
                 mettreAJourTableaux();
             }
         }
@@ -1119,117 +1114,11 @@
                 vehicules = vehicules.filter(v => v.id !== id);
                 // Supprimer aussi les interventions liées
                 interventions = interventions.filter(i => i.vehiculeId != id);
-                sauvegarderDonnees();
                 mettreAJourTableaux();
             }
         }
+            ];
         
-        // Fonctions de sauvegarde/chargement
-        function sauvegarderDonnees() {
-            const donnees = {
-                vehicules,
-                interventions,
-                bonCommandes,
-                nextBCNum
-            };
-            // En production, ces données seraient sauvegardées dans une base de données
-            // Ici, nous utilisons le stockage en mémoire pour la démonstration
-            console.log('Données sauvegardées:', donnees);
-        }
-        
-        function chargerDonnees() {
-            // En production, ces données seraient chargées depuis une base de données
-            // Ici, nous initialisons avec quelques données d'exemple
-            
-            // Données d'exemple
-            vehicules = [
-                {
-                    id: 1,
-                    indicatif: 'FPTSR 05-001',
-                    type: 'FPTSR',
-                    marque: 'Renault',
-                    modele: 'Master',
-                    annee: 2020,
-                    kilometrage: 45000,
-                    statut: 'En service',
-                    caserne: 'Gap',
-                    dateAjout: '2024-01-15'
-                },
-                {
-                    id: 2,
-                    indicatif: 'VSAV 05-012',
-                    type: 'VSAV',
-                    marque: 'Mercedes',
-                    modele: 'Sprinter',
-                    annee: 2019,
-                    kilometrage: 78000,
-                    statut: 'Maintenance',
-                    caserne: 'Briançon',
-                    dateAjout: '2024-02-10'
-                },
-                {
-                    id: 3,
-                    indicatif: 'EPA 05-003',
-                    type: 'EPA',
-                    marque: 'Iveco',
-                    modele: 'Daily',
-                    annee: 2021,
-                    kilometrage: 32000,
-                    statut: 'En service',
-                    caserne: 'Embrun',
-                    dateAjout: '2024-03-05'
-                }
-            ];
-            
-            interventions = [
-                {
-                    id: 1,
-                    vehiculeId: 1,
-                    type: 'Révision',
-                    priorite: 'Moyenne',
-                    datePrevue: '2025-07-15',
-                    description: 'Révision des 50 000 km',
-                    statut: 'Planifiée',
-                    dateCreation: '2025-06-20'
-                },
-                {
-                    id: 2,
-                    vehiculeId: 2,
-                    type: 'Réparation',
-                    priorite: 'Haute',
-                    datePrevue: '2025-07-02',
-                    description: 'Problème de freinage avant',
-                    statut: 'En cours',
-                    dateCreation: '2025-06-25'
-                }
-            ];
-            
-            bonCommandes = [
-                {
-                    id: 1,
-                    numero: 'BC2025-0001',
-                    date: '2025-06-25',
-                    vehiculeId: 2,
-                    fournisseur: 'Garage Central',
-                    demandeur: 'Chef Mécanicien',
-                    urgence: 'Urgent',
-                    articles: [
-                        {
-                            id: 1,
-                            reference: 'PLQ-FR-001',
-                            designation: 'Plaquettes de frein avant',
-                            quantite: 1,
-                            prixUnitaire: 85.50,
-                            total: 85.50
-                        }
-                    ],
-                    totalHT: 85.50,
-                    tva: 17.10,
-                    totalTTC: 102.60,
-                    statut: 'Commandé',
-                    dateCreation: '2025-06-25'
-                }
-            ];
             
             nextBCNum = 2;
         }
@@ -1293,6 +1182,14 @@
   // Initialise Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+
+onSnapshot(collection(db, "vehicules"), (snapshot) => {
+    vehicules = []; // vide le tableau local
+    snapshot.forEach(doc => {
+        vehicules.push({ id: doc.id, ...doc.data() }); // récupère chaque véhicule depuis Firestore
+    });
+    mettreAJourTableaux(); // affiche dans le tableau HTML
+});
 
   const vehiculesCol = collection(db, "vehicules");
 
