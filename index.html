@@ -909,7 +909,7 @@
                     <td><strong>${nbInterventions}</strong></td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-small" onclick="modifierVehicule(${vehicule.id})">Modifier</button>
+                            <button class="btn btn-small" onclick="remplirFormulairePourModifier('${vehicule.id}')">Modifier</button>
                             <button class="btn btn-small btn-secondary" onclick="supprimerVehicule(${vehicule.id})">Supprimer</button>
                         </div>
                     </td>
@@ -1095,26 +1095,6 @@
                     <td>${pourcentage}%</td>
                 `;
             });
-        }
-        
-        // Fonctions de modification/suppression
-        function modifierVehicule(id) {
-            const vehicule = vehicules.find(v => v.id === id);
-            if (vehicule) {
-                document.getElementById('indicatif').value = vehicule.indicatif;
-                document.getElementById('type').value = vehicule.type;
-                document.getElementById('marque').value = vehicule.marque;
-                document.getElementById('modele').value = vehicule.modele;
-                document.getElementById('annee').value = vehicule.annee;
-                document.getElementById('kilometrage').value = vehicule.kilometrage;
-                document.getElementById('statut').value = vehicule.statut;
-                document.getElementById('caserne').value = vehicule.caserne;
-                
-                // Supprimer l'ancien véhicule pour permettre la modification
-                vehicules = vehicules.filter(v => v.id !== id);
-                sauvegarderDonnees();
-                mettreAJourTableaux();
-            }
         }
         
         <script>
@@ -1345,6 +1325,26 @@
 
     } catch (e) {
       console.error("❌ Erreur Firestore update :", e);
+    }
+  }
+  // 🔽🔽🔽 COLLE LA FONCTION ICI 🔽🔽🔽
+  function remplirFormulairePourModifier(id) {
+    const vehicule = vehicules.find(v => v.id === id);
+    if (vehicule) {
+      document.getElementById('indicatif').value = vehicule.indicatif;
+      document.getElementById('type').value = vehicule.type;
+      document.getElementById('marque').value = vehicule.marque;
+      document.getElementById('modele').value = vehicule.modele;
+      document.getElementById('annee').value = vehicule.annee;
+      document.getElementById('kilometrage').value = vehicule.kilometrage;
+      document.getElementById('statut').value = vehicule.statut;
+      document.getElementById('caserne').value = vehicule.caserne;
+
+      document.getElementById('btn-ajouter-vehicule').onclick = function() {
+        modifierVehiculeFirestore(id);
+      };
+
+      document.getElementById('btn-ajouter-vehicule').textContent = "Modifier Véhicule";
     }
   }
 </script>
