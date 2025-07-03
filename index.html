@@ -1,1353 +1,207 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion Maintenance SDIS 05</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #c41e3a, #e74c3c);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 15px;
-            background: #f8f9fa;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .tab.active {
-            background: #c41e3a;
-            color: white;
-        }
-        
-        .tab:hover:not(.active) {
-            background: #e9ecef;
-        }
-        
-        .tab-content {
-            display: none;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .section {
-            margin-bottom: 30px;
-        }
-        
-        .section h3 {
-            color: #c41e3a;
-            border-bottom: 2px solid #c41e3a;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        
-        .form-group label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
-        
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-        
-        .btn {
-            background: #c41e3a;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            margin: 5px;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: #a01729;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-        }
-        
-        .btn-secondary:hover {
-            background: #545b62;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        th {
-            background: #c41e3a;
-            color: white;
-            font-weight: bold;
-        }
-        
-        tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .status {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .status.en-service { background: #d4edda; color: #155724; }
-        .status.maintenance { background: #fff3cd; color: #856404; }
-        .status.reparation { background: #f8d7da; color: #721c24; }
-        .status.hors-service { background: #d1ecf1; color: #0c5460; }
-        
-        .priority {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .priority.haute { background: #f8d7da; color: #721c24; }
-        .priority.moyenne { background: #fff3cd; color: #856404; }
-        .priority.basse { background: #d4edda; color: #155724; }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #c41e3a;
-        }
-        
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            color: #c41e3a;
-        }
-        
-        .filters {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .filters select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .btn-small {
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #000;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SDIS 05 - Gestion Véhicules</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="header">
-        <h1>🚒 SDIS 05 - Gestion Maintenance Mécanique</h1>
-        <p>Service Départemental d'Incendie et de Secours des Hautes-Alpes</p>
-    </div>
-    
-    <div class="tabs">
-        <button class="tab active" onclick="showTab('vehicules')">Véhicules & Maintenance</button>
-        <button class="tab" onclick="showTab('commandes')">Bons de Commande</button>
-        <button class="tab" onclick="showTab('dashboard')">Tableau de Bord</button>
-    </div>
-    
-    <!-- ONGLET VÉHICULES -->
-    <div id="vehicules" class="tab-content active">
-        <div class="section">
-            <h3>Ajouter un Véhicule</h3>
-            <div class="form-group">
-                <div>
-                    <label>Indicatif</label>
-                    <input type="text" id="indicatif" placeholder="Ex: FPTSR 05-001">
-                </div>
-                <div>
-                    <label>Type</label>
-                    <select id="type">
-                        <option value="">Sélectionner</option>
-                        <option value="FPTSR">CCFM 01</option>
-                        <option value="FPTL">CCFM 02</option>
-                        <option value="EPA">VSAV HR</option>
-                        <option value="VSAV">VSAV</option>
-                        <option value="CCF">VTU</option>
-                        <option value="VTU">VSRM</option>
-                        <option value="VL">VTP</option>
-                        <option value="FPTSR">GSMPM</option>
-                        <option value="FPTSR">VL 01</option>
-                        <option value="FPTSR">CCGC</option>
-                        <option value="FPTSR">VLCC</option>
-                        <option value="FPTSR">FPT 01</option>
-                        <option value="FPTSR">VIRT</option>
-                        <option value="FPTSR">PCC</option>
-                        <option value="FPTSR">EPC</option>
-                        <option value="FPTSR">VPL-HR</option>
-                        <option value="FPTSR">VPI-HR</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Marque</label>
-                    <input type="text" id="marque" placeholder="Ex: Renault">
-                </div>
-                <div>
-                    <label>Modèle</label>
-                    <input type="text" id="modele" placeholder="Ex: Master">
-                </div>
-                <div>
-                    <label>Année</label>
-                    <input type="number" id="annee" min="1990" max="2025">
-                </div>
-                <div>
-                    <label>Kilométrage</label>
-                    <input type="number" id="kilometrage" placeholder="0">
-                </div>
-                <div>
-                    <label>Statut</label>
-                    <select id="statut">
-                        <option value="En service">En service</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Réparation">Réparation</option>
-                        <option value="Hors service">Hors service</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Caserne</label>
-                    <input type="text" id="caserne" placeholder="Ex: Gap">
-                </div>
-            </div>
-            <button class="btn" id="btn-ajouter-vehicule" onclick="ajouterVehicule()">Ajouter Véhicule</button>
-        </div>
-        
-        <div class="section">
-            <h3>Ajouter une Intervention</h3>
-            <div class="form-group">
-                <div>
-                    <label>Véhicule</label>
-                    <select id="vehicule-intervention">
-                        <option value="">Sélectionner un véhicule</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Type d'intervention</label>
-                    <select id="type-intervention">
-                        <option value="">Sélectionner</option>
-                        <option value="Révision">Révision</option>
-                        <option value="Réparation">Réparation</option>
-                        <option value="Contrôle technique">Contrôle technique</option>
-                        <option value="Changement pièce">Changement pièce</option>
-                        <option value="Maintenance préventive">Maintenance préventive</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Priorité</label>
-                    <select id="priorite">
-                        <option value="Basse">Basse</option>
-                        <option value="Moyenne">Moyenne</option>
-                        <option value="Haute">Haute</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Date prévue</label>
-                    <input type="date" id="date-prevue">
-                </div>
-                <div style="grid-column: 1 / -1;">
-                    <label>Description</label>
-                    <textarea id="description-intervention" placeholder="Détails de l'intervention..."></textarea>
-                </div>
-            </div>
-            <button class="btn" onclick="ajouterIntervention()">Ajouter Intervention</button>
-        </div>
-        
-        <div class="section">
-            <h3>Liste des Véhicules</h3>
-            <div class="filters">
-                <select id="filter-type" onchange="filtrerVehicules()">
-                    <option value="">Tous les types</option>
-                    <option value="FPTSR">FPTSR</option>
-                    <option value="FPTL">FPTL</option>
-                    <option value="EPA">EPA</option>
-                    <option value="VSAV">VSAV</option>
-                    <option value="CCF">CCF</option>
-                    <option value="VTU">VTU</option>
-                    <option value="VL">VL</option>
-                </select>
-                <select id="filter-statut" onchange="filtrerVehicules()">
-                    <option value="">Tous les statuts</option>
-                    <option value="En service">En service</option>
-                    <option value="Maintenance">Maintenance</option>
-                    <option value="Réparation">Réparation</option>
-                    <option value="Hors service">Hors service</option>
-                </select>
-                <select id="filter-caserne" onchange="filtrerVehicules()">
-                    <option value="">Toutes les casernes</option>
-                </select>
-            </div>
-            <table id="table-vehicules">
-                <thead>
-                    <tr>
-                        <th>Indicatif</th>
-                        <th>Type</th>
-                        <th>Marque/Modèle</th>
-                        <th>Année</th>
-                        <th>Kilométrage</th>
-                        <th>Statut</th>
-                        <th>Caserne</th>
-                        <th>Interventions</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <div class="section">
-            <h3>Interventions à Venir</h3>
-            <table id="table-interventions">
-                <thead>
-                    <tr>
-                        <th>Véhicule</th>
-                        <th>Type</th>
-                        <th>Priorité</th>
-                        <th>Date prévue</th>
-                        <th>Description</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-    
-    <!-- ONGLET COMMANDES -->
-    <div id="commandes" class="tab-content">
-        <div class="section">
-            <h3>Nouveau Bon de Commande</h3>
-            <div class="form-group">
-                <div>
-                    <label>N° BC (Auto)</label>
-                    <input type="text" id="num-bc" readonly>
-                </div>
-                <div>
-                    <label>Date</label>
-                    <input type="date" id="date-bc">
-                </div>
-                <div>
-                    <label>Véhicule concerné</label>
-                    <select id="vehicule-bc">
-                        <option value="">Sélectionner</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Fournisseur</label>
-                    <input type="text" id="fournisseur" placeholder="Nom du fournisseur">
-                </div>
-                <div>
-                    <label>Demandeur</label>
-                    <input type="text" id="demandeur" placeholder="Nom du demandeur">
-                </div>
-                <div>
-                    <label>Urgence</label>
-                    <select id="urgence-bc">
-                        <option value="Normal">Normal</option>
-                        <option value="Urgent">Urgent</option>
-                        <option value="Très urgent">Très urgent</option>
-                    </select>
-                </div>
-            </div>
-            
-            <h4>Articles</h4>
-            <div class="form-group">
-                <div>
-                    <label>Référence</label>
-                    <input type="text" id="ref-article" placeholder="Référence pièce">
-                </div>
-                <div>
-                    <label>Désignation</label>
-                    <input type="text" id="designation" placeholder="Description de la pièce">
-                </div>
-                <div>
-                    <label>Quantité</label>
-                    <input type="number" id="quantite" min="1" value="1">
-                </div>
-                <div>
-                    <label>Prix unitaire HT</label>
-                    <input type="number" id="prix-unitaire" step="0.01" min="0">
-                </div>
-            </div>
-            <button class="btn btn-secondary" onclick="ajouterArticle()">Ajouter Article</button>
-            
-            <table id="table-articles">
-                <thead>
-                    <tr>
-                        <th>Référence</th>
-                        <th>Désignation</th>
-                        <th>Quantité</th>
-                        <th>Prix unitaire HT</th>
-                        <th>Total HT</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="4">Total HT</th>
-                        <th id="total-ht">0.00 €</th>
-                        <th></th>
-                    </tr>
-                    <tr>
-                        <th colspan="4">TVA (20%)</th>
-                        <th id="total-tva">0.00 €</th>
-                        <th></th>
-                    </tr>
-                    <tr>
-                        <th colspan="4">Total TTC</th>
-                        <th id="total-ttc">0.00 €</th>
-                        <th></th>
-                    </tr>
-                </tfoot>
-            </table>
-            
-            <div style="margin-top: 20px;">
-                <button class="btn" onclick="enregistrerBC()">Enregistrer Bon de Commande</button>
-                <button class="btn btn-secondary" onclick="nouveauBC()">Nouveau BC</button>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h3>Liste des Bons de Commande</h3>
-            <div class="filters">
-                <select id="filter-statut-bc" onchange="filtrerBC()">
-                    <option value="">Tous les statuts</option>
-                    <option value="En attente">En attente</option>
-                    <option value="Validé">Validé</option>
-                    <option value="Commandé">Commandé</option>
-                    <option value="Livré">Livré</option>
-                    <option value="Annulé">Annulé</option>
-                </select>
-                <select id="filter-urgence-bc" onchange="filtrerBC()">
-                    <option value="">Toutes urgences</option>
-                    <option value="Normal">Normal</option>
-                    <option value="Urgent">Urgent</option>
-                    <option value="Très urgent">Très urgent</option>
-                </select>
-            </div>
-            <table id="table-bc">
-                <thead>
-                    <tr>
-                        <th>N° BC</th>
-                        <th>Date</th>
-                        <th>Véhicule</th>
-                        <th>Fournisseur</th>
-                        <th>Demandeur</th>
-                        <th>Total TTC</th>
-                        <th>Urgence</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-    
-    <!-- ONGLET DASHBOARD -->
-    <div id="dashboard" class="tab-content">
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="stat-vehicules">0</div>
-                <div>Véhicules</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="stat-en-service">0</div>
-                <div>En Service</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="stat-maintenance">0</div>
-                <div>En Maintenance</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="stat-interventions">0</div>
-                <div>Interventions Prévues</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="stat-bc">0</div>
-                <div>Bons de Commande</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="stat-bc-attente">0</div>
-                <div>BC En Attente</div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h3>Interventions Urgentes</h3>
-            <table id="table-interventions-urgentes">
-                <thead>
-                    <tr>
-                        <th>Véhicule</th>
-                        <th>Type</th>
-                        <th>Priorité</th>
-                        <th>Date prévue</th>
-                        <th>Retard</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <div class="section">
-            <h3>Véhicules par Statut</h3>
-            <table id="table-statuts">
-                <thead>
-                    <tr>
-                        <th>Statut</th>
-                        <th>Nombre</th>
-                        <th>Pourcentage</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
+  <h1>SDIS 05 - Gestion Véhicules</h1>
 
-    <script>
-        // Variables globales
-        let vehicules = [];
-        let interventions = [];
-        let bonCommandes = [];
-        let articlesBC = [];
-        let nextBCNum = 1;
-        
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            chargerDonnees();
-            mettreAJourTableaux();
-            mettreAJourDashboard();
-            document.getElementById('date-bc').value = new Date().toISOString().split('T')[0];
-            document.getElementById('date-prevue').value = new Date().toISOString().split('T')[0];
-            genererNumeroBc();
-        });
-        
-        // Gestion des onglets
-        function showTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-            
-            if (tabName === 'dashboard') {
-                mettreAJourDashboard();
-            }
-        }
-        
-        // Fonctions véhicules
-        <script>
-  async function ajouterVehicule() {
-    const vehicule = {
-      indicatif: document.getElementById('indicatif').value,
-      type: document.getElementById('type').value,
-      marque: document.getElementById('marque').value,
-      modele: document.getElementById('modele').value,
-      annee: parseInt(document.getElementById('annee').value),
-      kilometrage: parseInt(document.getElementById('kilometrage').value),
-      statut: document.getElementById('statut').value,
-      caserne: document.getElementById('caserne').value,
-      dateAjout: new Date().toISOString()
-    };
+  <div class="section">
+    <h3>Ajouter un Véhicule</h3>
+    <label>Indicatif :</label>
+    <input type="text" id="indicatif"><br/>
+    <label>Type :</label>
+    <input type="text" id="type"><br/>
+    <label>Marque :</label>
+    <input type="text" id="marque"><br/>
+    <label>Modèle :</label>
+    <input type="text" id="modele"><br/>
+    <label>Année :</label>
+    <input type="number" id="annee"><br/>
+    <label>Kilométrage :</label>
+    <input type="number" id="kilometrage"><br/>
+    <label>Statut :</label>
+    <input type="text" id="statut"><br/>
+    <label>Caserne :</label>
+    <input type="text" id="caserne"><br/>
+    <button class="btn" id="btn-ajouter-vehicule" onclick="ajouterVehicule()">Ajouter Véhicule</button>
+  </div>
 
-    try {
-      await db.collection("vehicules").add(vehicule);
-      alert('✅ Véhicule ajouté à Firestore !');
-    } catch (e) {
-      console.error("Erreur Firestore :", e);
-    }
-  }
-        
-            vehicules.push(vehicule);
-            sauvegarderDonnees();
-            mettreAJourTableaux();
-            viderFormulaireVehicule();
-            alert('Véhicule ajouté avec succès');
-        }
-        
-        function viderFormulaireVehicule() {
-            document.getElementById('indicatif').value = '';
-            document.getElementById('type').value = '';
-            document.getElementById('marque').value = '';
-            document.getElementById('modele').value = '';
-            document.getElementById('annee').value = '';
-            document.getElementById('kilometrage').value = '';
-            document.getElementById('statut').value = 'En service';
-            document.getElementById('caserne').value = '';
-        }
-        
-        function ajouterIntervention() {
-            const intervention = {
-                id: Date.now(),
-                vehiculeId: document.getElementById('vehicule-intervention').value,
-                type: document.getElementById('type-intervention').value,
-                priorite: document.getElementById('priorite').value,
-                datePrevue: document.getElementById('date-prevue').value,
-                description: document.getElementById('description-intervention').value,
-                statut: 'Planifiée',
-                dateCreation: new Date().toISOString().split('T')[0]
-            };
-            
-            if (!intervention.vehiculeId || !intervention.type) {
-                alert('Veuillez sélectionner un véhicule et un type d\'intervention');
-                return;
-            }
-            
-            interventions.push(intervention);
-            sauvegarderDonnees();
-            mettreAJourTableaux();
-            viderFormulaireIntervention();
-            alert('Intervention ajoutée avec succès');
-        }
-        
-        function viderFormulaireIntervention() {
-            document.getElementById('vehicule-intervention').value = '';
-            document.getElementById('type-intervention').value = '';
-            document.getElementById('priorite').value = 'Basse';
-            document.getElementById('date-prevue').value = new Date().toISOString().split('T')[0];
-            document.getElementById('description-intervention').value = '';
-        }
-        
-        function modifierStatutIntervention(id, nouveauStatut) {
-            const intervention = interventions.find(i => i.id === id);
-            if (intervention) {
-                intervention.statut = nouveauStatut;
-                if (nouveauStatut === 'Terminée') {
-                    intervention.dateTerminee = new Date().toISOString().split('T')[0];
-                }
-                sauvegarderDonnees();
-                mettreAJourTableaux();
-            }
-        }
-        
-        // Fonctions bons de commande
-        function genererNumeroBc() {
-            const annee = new Date().getFullYear();
-            const numero = String(nextBCNum).padStart(4, '0');
-            document.getElementById('num-bc').value = `BC${annee}-${numero}`;
-        }
-        
-        function ajouterArticle() {
-            const reference = document.getElementById('ref-article').value;
-            const designation = document.getElementById('designation').value;
-            const quantite = parseInt(document.getElementById('quantite').value) || 1;
-            const prixUnitaire = parseFloat(document.getElementById('prix-unitaire').value) || 0;
-            
-            if (!reference || !designation) {
-                alert('Veuillez remplir la référence et la désignation');
-                return;
-            }
-            
-            const article = {
-                id: Date.now(),
-                reference,
-                designation,
-                quantite,
-                prixUnitaire,
-                total: quantite * prixUnitaire
-            };
-            
-            articlesBC.push(article);
-            mettreAJourTableArticles();
-            viderFormulaireArticle();
-        }
-        
-        function viderFormulaireArticle() {
-            document.getElementById('ref-article').value = '';
-            document.getElementById('designation').value = '';
-            document.getElementById('quantite').value = '1';
-            document.getElementById('prix-unitaire').value = '';
-        }
-        
-        function supprimerArticle(id) {
-            articlesBC = articlesBC.filter(a => a.id !== id);
-            mettreAJourTableArticles();
-        }
-        
-        function mettreAJourTableArticles() {
-            const tbody = document.querySelector('#table-articles tbody');
-            tbody.innerHTML = '';
-            
-            let totalHT = 0;
-            
-            articlesBC.forEach(article => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${article.reference}</td>
-                    <td>${article.designation}</td>
-                    <td>${article.quantite}</td>
-                    <td>${article.prixUnitaire.toFixed(2)} €</td>
-                    <td>${article.total.toFixed(2)} €</td>
-                    <td>
-                        <button class="btn btn-small" onclick="supprimerArticle(${article.id})">Supprimer</button>
-                    </td>
-                `;
-                totalHT += article.total;
-            });
-            
-            const tva = totalHT * 0.2;
-            const totalTTC = totalHT + tva;
-            
-            document.getElementById('total-ht').textContent = totalHT.toFixed(2) + ' €';
-            document.getElementById('total-tva').textContent = tva.toFixed(2) + ' €';
-            document.getElementById('total-ttc').textContent = totalTTC.toFixed(2) + ' €';
-        }
-        
-        function enregistrerBC() {
-            if (articlesBC.length === 0) {
-                alert('Veuillez ajouter au moins un article');
-                return;
-            }
-            
-            const totalHT = articlesBC.reduce((sum, article) => sum + article.total, 0);
-            const tva = totalHT * 0.2;
-            const totalTTC = totalHT + tva;
-            
-            const bc = {
-                id: Date.now(),
-                numero: document.getElementById('num-bc').value,
-                date: document.getElementById('date-bc').value,
-                vehiculeId: document.getElementById('vehicule-bc').value,
-                fournisseur: document.getElementById('fournisseur').value,
-                demandeur: document.getElementById('demandeur').value,
-                urgence: document.getElementById('urgence-bc').value,
-                articles: [...articlesBC],
-                totalHT,
-                tva,
-                totalTTC,
-                statut: 'En attente',
-                dateCreation: new Date().toISOString().split('T')[0]
-            };
-            
-            bonCommandes.push(bc);
-            nextBCNum++;
-            sauvegarderDonnees();
-            mettreAJourTableaux();
-            nouveauBC();
-            alert('Bon de commande enregistré avec succès');
-        }
-        
-        function nouveauBC() {
-            document.getElementById('vehicule-bc').value = '';
-            document.getElementById('fournisseur').value = '';
-            document.getElementById('demandeur').value = '';
-            document.getElementById('urgence-bc').value = 'Normal';
-            articlesBC = [];
-            mettreAJourTableArticles();
-            genererNumeroBc();
-        }
-        
-        function modifierStatutBC(id, nouveauStatut) {
-            const bc = bonCommandes.find(b => b.id === id);
-            if (bc) {
-                bc.statut = nouveauStatut;
-                sauvegarderDonnees();
-                mettreAJourTableaux();
-            }
-        }
-        
-        // Fonctions de mise à jour des tableaux
-        function mettreAJourTableaux() {
-            mettreAJourTableVehicules();
-            mettreAJourTableInterventions();
-            mettreAJourTableBC();
-            mettreAJourSelecteurs();
-            mettreAJourFiltres();
-        }
-        
-        function mettreAJourTableVehicules() {
-            const tbody = document.querySelector('#table-vehicules tbody');
-            tbody.innerHTML = '';
-            
-            let vehiculesFiltres = [...vehicules];
-            
-            // Appliquer les filtres
-            const filterType = document.getElementById('filter-type').value;
-            const filterStatut = document.getElementById('filter-statut').value;
-            const filterCaserne = document.getElementById('filter-caserne').value;
-            
-            if (filterType) vehiculesFiltres = vehiculesFiltres.filter(v => v.type === filterType);
-            if (filterStatut) vehiculesFiltres = vehiculesFiltres.filter(v => v.statut === filterStatut);
-            if (filterCaserne) vehiculesFiltres = vehiculesFiltres.filter(v => v.caserne === filterCaserne);
-            
-            vehiculesFiltres.forEach(vehicule => {
-                const interventionsVehicule = interventions.filter(i => i.vehiculeId == vehicule.id && i.statut !== 'Terminée');
-                const nbInterventions = interventionsVehicule.length;
-                
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td><strong>${vehicule.indicatif}</strong></td>
-                    <td>${vehicule.type}</td>
-                    <td>${vehicule.marque} ${vehicule.modele}</td>
-                    <td>${vehicule.annee}</td>
-                    <td>${parseInt(vehicule.kilometrage).toLocaleString()} km</td>
-                    <td><span class="status ${vehicule.statut.toLowerCase().replace(' ', '-')}">${vehicule.statut}</span></td>
-                    <td>${vehicule.caserne}</td>
-                    <td><strong>${nbInterventions}</strong></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-small" onclick="remplirFormulairePourModifier('${vehicule.id}')">Modifier</button>
-                            <button class="btn btn-small btn-secondary" onclick="supprimerVehicule(${vehicule.id})">Supprimer</button>
-                        </div>
-                    </td>
-                `;
-            });
-        }
-        
-        function mettreAJourTableInterventions() {
-            const tbody = document.querySelector('#table-interventions tbody');
-            tbody.innerHTML = '';
-            
-            const interventionsActives = interventions.filter(i => i.statut !== 'Terminée')
-                .sort((a, b) => {
-                    if (a.priorite === 'Haute' && b.priorite !== 'Haute') return -1;
-                    if (b.priorite === 'Haute' && a.priorite !== 'Haute') return 1;
-                    return new Date(a.datePrevue) - new Date(b.datePrevue);
-                });
-            
-            interventionsActives.forEach(intervention => {
-                const vehicule = vehicules.find(v => v.id == intervention.vehiculeId);
-                const vehiculeNom = vehicule ? vehicule.indicatif : 'Véhicule supprimé';
-                
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td><strong>${vehiculeNom}</strong></td>
-                    <td>${intervention.type}</td>
-                    <td><span class="priority ${intervention.priorite.toLowerCase()}">${intervention.priorite}</span></td>
-                    <td>${new Date(intervention.datePrevue).toLocaleDateString('fr-FR')}</td>
-                    <td>${intervention.description}</td>
-                    <td>${intervention.statut}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-small" onclick="modifierStatutIntervention(${intervention.id}, 'En cours')">En cours</button>
-                            <button class="btn btn-small" onclick="modifierStatutIntervention(${intervention.id}, 'Terminée')">Terminer</button>
-                        </div>
-                    </td>
-                `;
-            });
-        }
-        
-        function mettreAJourTableBC() {
-            const tbody = document.querySelector('#table-bc tbody');
-            tbody.innerHTML = '';
-            
-            let bcFiltres = [...bonCommandes];
-            
-            // Appliquer les filtres
-            const filterStatutBC = document.getElementById('filter-statut-bc').value;
-            const filterUrgenceBC = document.getElementById('filter-urgence-bc').value;
-            
-            if (filterStatutBC) bcFiltres = bcFiltres.filter(bc => bc.statut === filterStatutBC);
-            if (filterUrgenceBC) bcFiltres = bcFiltres.filter(bc => bc.urgence === filterUrgenceBC);
-            
-            bcFiltres.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(bc => {
-                const vehicule = vehicules.find(v => v.id == bc.vehiculeId);
-                const vehiculeNom = vehicule ? vehicule.indicatif : 'N/A';
-                
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td><strong>${bc.numero}</strong></td>
-                    <td>${new Date(bc.date).toLocaleDateString('fr-FR')}</td>
-                    <td>${vehiculeNom}</td>
-                    <td>${bc.fournisseur}</td>
-                    <td>${bc.demandeur}</td>
-                    <td><strong>${bc.totalTTC.toFixed(2)} €</strong></td>
-                    <td><span class="priority ${bc.urgence.toLowerCase().replace(' ', '-')}">${bc.urgence}</span></td>
-                    <td>${bc.statut}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <select onchange="modifierStatutBC(${bc.id}, this.value)">
-                                <option value="${bc.statut}">${bc.statut}</option>
-                                <option value="En attente">En attente</option>
-                                <option value="Validé">Validé</option>
-                                <option value="Commandé">Commandé</option>
-                                <option value="Livré">Livré</option>
-                                <option value="Annulé">Annulé</option>
-                            </select>
-                        </div>
-                    </td>
-                `;
-            });
-        }
-        
-        function mettreAJourSelecteurs() {
-            // Mettre à jour le sélecteur de véhicules pour les interventions
-            const selectVehiculeIntervention = document.getElementById('vehicule-intervention');
-            selectVehiculeIntervention.innerHTML = '<option value="">Sélectionner un véhicule</option>';
-            
-            // Mettre à jour le sélecteur de véhicules pour les BC
-            const selectVehiculeBC = document.getElementById('vehicule-bc');
-            selectVehiculeBC.innerHTML = '<option value="">Sélectionner</option>';
-            
-            vehicules.forEach(vehicule => {
-                const option1 = new Option(`${vehicule.indicatif} (${vehicule.type})`, vehicule.id);
-                const option2 = new Option(`${vehicule.indicatif} (${vehicule.type})`, vehicule.id);
-                selectVehiculeIntervention.add(option1);
-                selectVehiculeBC.add(option2);
-            });
-        }
-        
-        function mettreAJourFiltres() {
-            // Mettre à jour le filtre des casernes
-            const selectCaserne = document.getElementById('filter-caserne');
-            const casernes = [...new Set(vehicules.map(v => v.caserne).filter(c => c))];
-            selectCaserne.innerHTML = '<option value="">Toutes les casernes</option>';
-            
-            casernes.forEach(caserne => {
-                selectCaserne.add(new Option(caserne, caserne));
-            });
-        }
-        
-        // Fonctions de filtrage
-        function filtrerVehicules() {
-            mettreAJourTableVehicules();
-        }
-        
-        function filtrerBC() {
-            mettreAJourTableBC();
-        }
-        
-        // Fonctions dashboard
-        function mettreAJourDashboard() {
-            // Statistiques générales
-            document.getElementById('stat-vehicules').textContent = vehicules.length;
-            document.getElementById('stat-en-service').textContent = vehicules.filter(v => v.statut === 'En service').length;
-            document.getElementById('stat-maintenance').textContent = vehicules.filter(v => v.statut === 'Maintenance' || v.statut === 'Réparation').length;
-            document.getElementById('stat-interventions').textContent = interventions.filter(i => i.statut !== 'Terminée').length;
-            document.getElementById('stat-bc').textContent = bonCommandes.length;
-            document.getElementById('stat-bc-attente').textContent = bonCommandes.filter(bc => bc.statut === 'En attente').length;
-            
-            // Interventions urgentes
-            mettreAJourInterventionsUrgentes();
-            
-            // Répartition par statut
-            mettreAJourRepartitionStatuts();
-        }
-        
-        function mettreAJourInterventionsUrgentes() {
-            const tbody = document.querySelector('#table-interventions-urgentes tbody');
-            tbody.innerHTML = '';
-            
-            const aujourd_hui = new Date();
-            const interventionsUrgentes = interventions
-                .filter(i => i.statut !== 'Terminée')
-                .filter(i => i.priorite === 'Haute' || new Date(i.datePrevue) <= aujourd_hui)
-                .sort((a, b) => new Date(a.datePrevue) - new Date(b.datePrevue));
-            
-            interventionsUrgentes.forEach(intervention => {
-                const vehicule = vehicules.find(v => v.id == intervention.vehiculeId);
-                const vehiculeNom = vehicule ? vehicule.indicatif : 'Véhicule supprimé';
-                
-                const datePrevue = new Date(intervention.datePrevue);
-                const retard = aujourd_hui > datePrevue ? Math.ceil((aujourd_hui - datePrevue) / (1000 * 60 * 60 * 24)) : 0;
-                
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td><strong>${vehiculeNom}</strong></td>
-                    <td>${intervention.type}</td>
-                    <td><span class="priority ${intervention.priorite.toLowerCase()}">${intervention.priorite}</span></td>
-                    <td>${datePrevue.toLocaleDateString('fr-FR')}</td>
-                    <td>${retard > 0 ? `<strong style="color: red;">${retard} jour(s)</strong>` : '-'}</td>
-                `;
-            });
-        }
-        
-        function mettreAJourRepartitionStatuts() {
-            const tbody = document.querySelector('#table-statuts tbody');
-            tbody.innerHTML = '';
-            
-            const statuts = {};
-            vehicules.forEach(v => {
-                statuts[v.statut] = (statuts[v.statut] || 0) + 1;
-            });
-            
-            const total = vehicules.length;
-            
-            Object.entries(statuts).forEach(([statut, nombre]) => {
-                const pourcentage = total > 0 ? ((nombre / total) * 100).toFixed(1) : 0;
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td><span class="status ${statut.toLowerCase().replace(' ', '-')}">${statut}</span></td>
-                    <td><strong>${nombre}</strong></td>
-                    <td>${pourcentage}%</td>
-                `;
-            });
-        }
-        
-        <script>
-  async function supprimerVehicule(id) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) {
-      try {
-        await db.collection("vehicules").doc(id).delete();
-        alert('✅ Véhicule supprimé !');
+  <div class="section">
+    <h3>Liste des Véhicules</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Indicatif</th>
+          <th>Type</th>
+          <th>Marque</th>
+          <th>Modèle</th>
+          <th>Année</th>
+          <th>Kilométrage</th>
+          <th>Statut</th>
+          <th>Caserne</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="table-vehicules"></tbody>
+    </table>
+  </div>
 
-        // Recharge la liste à jour
-        chargerVehicules();
-      } catch (e) {
-        console.error("❌ Erreur lors de la suppression :", e);
-      }
-    }
-        
-        // Fonctions de sauvegarde/chargement
-        function sauvegarderDonnees() {
-            const donnees = {
-                vehicules,
-                interventions,
-                bonCommandes,
-                nextBCNum
-            };
-            // En production, ces données seraient sauvegardées dans une base de données
-            // Ici, nous utilisons le stockage en mémoire pour la démonstration
-            console.log('Données sauvegardées:', donnees);
-        }
-        
-        function chargerDonnees() {
-            // En production, ces données seraient chargées depuis une base de données
-            // Ici, nous initialisons avec quelques données d'exemple
-            
-            // Données d'exemple
-            vehicules = [
-                {
-                    id: 1,
-                    indicatif: 'FPTSR 05-001',
-                    type: 'FPTSR',
-                    marque: 'Renault',
-                    modele: 'Master',
-                    annee: 2020,
-                    kilometrage: 45000,
-                    statut: 'En service',
-                    caserne: 'Gap',
-                    dateAjout: '2024-01-15'
-                },
-                {
-                    id: 2,
-                    indicatif: 'VSAV 05-012',
-                    type: 'VSAV',
-                    marque: 'Mercedes',
-                    modele: 'Sprinter',
-                    annee: 2019,
-                    kilometrage: 78000,
-                    statut: 'Maintenance',
-                    caserne: 'Briançon',
-                    dateAjout: '2024-02-10'
-                },
-                {
-                    id: 3,
-                    indicatif: 'EPA 05-003',
-                    type: 'EPA',
-                    marque: 'Iveco',
-                    modele: 'Daily',
-                    annee: 2021,
-                    kilometrage: 32000,
-                    statut: 'En service',
-                    caserne: 'Embrun',
-                    dateAjout: '2024-03-05'
-                }
-            ];
-            
-            interventions = [
-                {
-                    id: 1,
-                    vehiculeId: 1,
-                    type: 'Révision',
-                    priorite: 'Moyenne',
-                    datePrevue: '2025-07-15',
-                    description: 'Révision des 50 000 km',
-                    statut: 'Planifiée',
-                    dateCreation: '2025-06-20'
-                },
-                {
-                    id: 2,
-                    vehiculeId: 2,
-                    type: 'Réparation',
-                    priorite: 'Haute',
-                    datePrevue: '2025-07-02',
-                    description: 'Problème de freinage avant',
-                    statut: 'En cours',
-                    dateCreation: '2025-06-25'
-                }
-            ];
-            
-            bonCommandes = [
-                {
-                    id: 1,
-                    numero: 'BC2025-0001',
-                    date: '2025-06-25',
-                    vehiculeId: 2,
-                    fournisseur: 'Garage Central',
-                    demandeur: 'Chef Mécanicien',
-                    urgence: 'Urgent',
-                    articles: [
-                        {
-                            id: 1,
-                            reference: 'PLQ-FR-001',
-                            designation: 'Plaquettes de frein avant',
-                            quantite: 1,
-                            prixUnitaire: 85.50,
-                            total: 85.50
-                        }
-                    ],
-                    totalHT: 85.50,
-                    tva: 17.10,
-                    totalTTC: 102.60,
-                    statut: 'Commandé',
-                    dateCreation: '2025-06-25'
-                }
-            ];
-            
-            nextBCNum = 2;
-        }
-        
-        // Fonctions d'export (pour une future implémentation)
-        function exporterDonnees() {
-            const donnees = {
-                vehicules,
-                interventions,
-                bonCommandes,
-                dateExport: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(donnees, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `sdis05_maintenance_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-    </script>
-    <!-- 🔗 SDK Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
 
-<script>
-  // 🔑 Colle ta config ici :
-  const firebaseConfig = {
-    apiKey: "AIzaSyCsFA_ZVIbOlpQPBu1WilSg-FqUYqJhZ0M",
-    authDomain: "sdis05-gestion.firebaseapp.com",
-    projectId: "sdis05-gestion",
-    storageBucket: "sdis05-gestion.firebasestorage.app",
-    messagingSenderId: "785596693509",
-    appId: "..."
-  };
+  <script>
+    // ✅ CONFIG FIREBASE : mets ta vraie config ici
+    const firebaseConfig = {
+  apiKey: "AIzaSyCsFA_ZVIbOlpQPBu1WilSg-FqUYqJhZ0M",
+  authDomain: "sdis05-gestion.firebaseapp.com",
+  projectId: "sdis05-gestion",
+  storageBucket: "sdis05-gestion.firebasestorage.app",
+  messagingSenderId: "785596693509",
+  appId: "1:785596693509:web:b98405268c1bc15f4ef06c"
+};
 
-  // ✅ Initialise Firebase
-  firebase.initializeApp(firebaseConfig);
+    // Initialiser Firebase et Firestore
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-  // ✅ Initialise Firestore
-  const db = firebase.firestore();
-</script>
-<!-- 🔗 SDK Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+    let vehicules = [];
 
-<script>
-  // 🔑 Colle ta config ici :
-  const firebaseConfig = {
-    apiKey: "AIzaSyCsFA_ZVIbOlpQPBu1WilSg-FqUYqJhZ0M",
-    authDomain: "sdis05-gestion.firebaseapp.com",
-    projectId: "sdis05-gestion",
-    storageBucket: "sdis05-gestion.firebasestorage.app",
-    messagingSenderId: "785596693509",
-    appId: "1:785596693509:web:b98405268c1bc15f4ef06c"
-  };
-
-  // ✅ Initialise Firebase
-  firebase.initializeApp(firebaseConfig);
-
-  // ✅ Initialise Firestore
-  const db = firebase.firestore();
-</script>
-<script>
-  async function chargerVehicules() {
-    try {
-      const snapshot = await db.collection("vehicules").get();
-      vehicules = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      mettreAJourTableVehicules();
-    } catch (e) {
-      console.error("Erreur :", e);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', chargerVehicules);
-</script>
-<script>
-  async function modifierVehiculeFirestore(id) {
-    const vehicule = {
-      indicatif: document.getElementById('indicatif').value,
-      type: document.getElementById('type').value,
-      marque: document.getElementById('marque').value,
-      modele: document.getElementById('modele').value,
-      annee: parseInt(document.getElementById('annee').value),
-      kilometrage: parseInt(document.getElementById('kilometrage').value),
-      statut: document.getElementById('statut').value,
-      caserne: document.getElementById('caserne').value
-    };
-
-    try {
-      await db.collection("vehicules").doc(id).update(vehicule);
-      alert('✅ Véhicule mis à jour dans Firestore !');
-
-      // Recharge la liste
-      chargerVehicules();
-
-      // Vide le formulaire
-      viderFormulaireVehicule();
-      
-      // Remet le bouton en mode "Ajouter"
-      document.getElementById('btn-ajouter-vehicule').onclick = ajouterVehicule;
-
-    } catch (e) {
-      console.error("❌ Erreur Firestore update :", e);
-    }
-  }
-  // 🔽🔽🔽 COLLE LA FONCTION ICI 🔽🔽🔽
-  function remplirFormulairePourModifier(id) {
-    const vehicule = vehicules.find(v => v.id === id);
-    if (vehicule) {
-      document.getElementById('indicatif').value = vehicule.indicatif;
-      document.getElementById('type').value = vehicule.type;
-      document.getElementById('marque').value = vehicule.marque;
-      document.getElementById('modele').value = vehicule.modele;
-      document.getElementById('annee').value = vehicule.annee;
-      document.getElementById('kilometrage').value = vehicule.kilometrage;
-      document.getElementById('statut').value = vehicule.statut;
-      document.getElementById('caserne').value = vehicule.caserne;
-
-      document.getElementById('btn-ajouter-vehicule').onclick = function() {
-        modifierVehiculeFirestore(id);
+    // ✅ Ajouter un véhicule
+    async function ajouterVehicule() {
+      const vehicule = {
+        indicatif: document.getElementById('indicatif').value,
+        type: document.getElementById('type').value,
+        marque: document.getElementById('marque').value,
+        modele: document.getElementById('modele').value,
+        annee: parseInt(document.getElementById('annee').value),
+        kilometrage: parseInt(document.getElementById('kilometrage').value),
+        statut: document.getElementById('statut').value,
+        caserne: document.getElementById('caserne').value,
+        dateAjout: new Date().toISOString()
       };
 
-      document.getElementById('btn-ajouter-vehicule').textContent = "Modifier Véhicule";
+      try {
+        await db.collection("vehicules").add(vehicule);
+        alert('✅ Véhicule ajouté !');
+        viderFormulaireVehicule();
+        chargerVehicules();
+      } catch (e) {
+        console.error("Erreur Firestore :", e);
+      }
     }
-  }
-</script>
 
+    // ✅ Charger les véhicules
+    async function chargerVehicules() {
+      try {
+        const snapshot = await db.collection("vehicules").get();
+        vehicules = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        mettreAJourTableVehicules();
+      } catch (e) {
+        console.error("Erreur Firestore :", e);
+      }
+    }
+
+    // ✅ Mettre à jour la table HTML
+    function mettreAJourTableVehicules() {
+      const tbody = document.getElementById('table-vehicules');
+      tbody.innerHTML = "";
+
+      vehicules.forEach(vehicule => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${vehicule.indicatif}</td>
+          <td>${vehicule.type}</td>
+          <td>${vehicule.marque}</td>
+          <td>${vehicule.modele}</td>
+          <td>${vehicule.annee}</td>
+          <td>${vehicule.kilometrage}</td>
+          <td>${vehicule.statut}</td>
+          <td>${vehicule.caserne}</td>
+          <td>
+            <button class="btn btn-small" onclick="remplirFormulairePourModifier('${vehicule.id}')">Modifier</button>
+            <button class="btn btn-small btn-secondary" onclick="supprimerVehicule('${vehicule.id}')">Supprimer</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // ✅ Supprimer un véhicule
+    async function supprimerVehicule(id) {
+      if (confirm('Êtes-vous sûr ?')) {
+        try {
+          await db.collection("vehicules").doc(id).delete();
+          alert('✅ Véhicule supprimé !');
+          chargerVehicules();
+        } catch (e) {
+          console.error("Erreur Firestore :", e);
+        }
+      }
+    }
+
+    // ✅ Remplir le formulaire pour modifier
+    function remplirFormulairePourModifier(id) {
+      const vehicule = vehicules.find(v => v.id === id);
+      if (vehicule) {
+        document.getElementById('indicatif').value = vehicule.indicatif;
+        document.getElementById('type').value = vehicule.type;
+        document.getElementById('marque').value = vehicule.marque;
+        document.getElementById('modele').value = vehicule.modele;
+        document.getElementById('annee').value = vehicule.annee;
+        document.getElementById('kilometrage').value = vehicule.kilometrage;
+        document.getElementById('statut').value = vehicule.statut;
+        document.getElementById('caserne').value = vehicule.caserne;
+
+        document.getElementById('btn-ajouter-vehicule').onclick = function() {
+          modifierVehiculeFirestore(id);
+        };
+        document.getElementById('btn-ajouter-vehicule').textContent = "Modifier Véhicule";
+      }
+    }
+
+    // ✅ Modifier dans Firestore
+    async function modifierVehiculeFirestore(id) {
+      const vehicule = {
+        indicatif: document.getElementById('indicatif').value,
+        type: document.getElementById('type').value,
+        marque: document.getElementById('marque').value,
+        modele: document.getElementById('modele').value,
+        annee: parseInt(document.getElementById('annee').value),
+        kilometrage: parseInt(document.getElementById('kilometrage').value),
+        statut: document.getElementById('statut').value,
+        caserne: document.getElementById('caserne').value
+      };
+
+      try {
+        await db.collection("vehicules").doc(id).update(vehicule);
+        alert('✅ Véhicule modifié !');
+        viderFormulaireVehicule();
+        document.getElementById('btn-ajouter-vehicule').onclick = ajouterVehicule;
+        document.getElementById('btn-ajouter-vehicule').textContent = "Ajouter Véhicule";
+        chargerVehicules();
+      } catch (e) {
+        console.error("Erreur Firestore :", e);
+      }
+    }
+
+    // ✅ Vider formulaire
+    function viderFormulaireVehicule() {
+      document.getElementById('indicatif').value = "";
+      document.getElementById('type').value = "";
+      document.getElementById('marque').value = "";
+      document.getElementById('modele').value = "";
+      document.getElementById('annee').value = "";
+      document.getElementById('kilometrage').value = "";
+      document.getElementById('statut').value = "";
+      document.getElementById('caserne').value = "";
+    }
+
+    document.addEventListener('DOMContentLoaded', chargerVehicules);
+  </script>
 </body>
 </html>
