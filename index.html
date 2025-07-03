@@ -659,25 +659,28 @@
         }
         
         // Fonctions véhicules
-        function ajouterVehicule() {
-            const vehicule = {
-                id: Date.now(),
-                indicatif: document.getElementById('indicatif').value,
-                type: document.getElementById('type').value,
-                marque: document.getElementById('marque').value,
-                modele: document.getElementById('modele').value,
-                annee: document.getElementById('annee').value,
-                kilometrage: document.getElementById('kilometrage').value,
-                statut: document.getElementById('statut').value,
-                caserne: document.getElementById('caserne').value,
-                dateAjout: new Date().toISOString().split('T')[0]
-            };
-            
-            if (!vehicule.indicatif || !vehicule.type) {
-                alert('Veuillez remplir au minimum l\'indicatif et le type');
-                return;
-            }
-            
+        <script>
+  async function ajouterVehicule() {
+    const vehicule = {
+      indicatif: document.getElementById('indicatif').value,
+      type: document.getElementById('type').value,
+      marque: document.getElementById('marque').value,
+      modele: document.getElementById('modele').value,
+      annee: parseInt(document.getElementById('annee').value),
+      kilometrage: parseInt(document.getElementById('kilometrage').value),
+      statut: document.getElementById('statut').value,
+      caserne: document.getElementById('caserne').value,
+      dateAjout: new Date().toISOString()
+    };
+
+    try {
+      await db.collection("vehicules").add(vehicule);
+      alert('✅ Véhicule ajouté à Firestore !');
+    } catch (e) {
+      console.error("Erreur Firestore :", e);
+    }
+  }
+        
             vehicules.push(vehicule);
             sauvegarderDonnees();
             mettreAJourTableaux();
@@ -1114,15 +1117,19 @@
             }
         }
         
-        function supprimerVehicule(id) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) {
-                vehicules = vehicules.filter(v => v.id !== id);
-                // Supprimer aussi les interventions liées
-                interventions = interventions.filter(i => i.vehiculeId != id);
-                sauvegarderDonnees();
-                mettreAJourTableaux();
-            }
-        }
+        <script>
+  async function supprimerVehicule(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) {
+      try {
+        await db.collection("vehicules").doc(id).delete();
+        alert('✅ Véhicule supprimé !');
+
+        // Recharge la liste à jour
+        chargerVehicules();
+      } catch (e) {
+        console.error("❌ Erreur lors de la suppression :", e);
+      }
+    }
         
         // Fonctions de sauvegarde/chargement
         function sauvegarderDonnees() {
@@ -1252,5 +1259,95 @@
             URL.revokeObjectURL(url);
         }
     </script>
+    <!-- 🔗 SDK Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+
+<script>
+  // 🔑 Colle ta config ici :
+  const firebaseConfig = {
+    apiKey: "AIzaSyCsFA_ZVIbOlpQPBu1WilSg-FqUYqJhZ0M",
+    authDomain: "sdis05-gestion.firebaseapp.com",
+    projectId: "sdis05-gestion",
+    storageBucket: "sdis05-gestion.firebasestorage.app",
+    messagingSenderId: "785596693509",
+    appId: "..."
+  };
+
+  // ✅ Initialise Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // ✅ Initialise Firestore
+  const db = firebase.firestore();
+</script>
+<!-- 🔗 SDK Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+
+<script>
+  // 🔑 Colle ta config ici :
+  const firebaseConfig = {
+    apiKey: "AIzaSyCsFA_ZVIbOlpQPBu1WilSg-FqUYqJhZ0M",
+    authDomain: "sdis05-gestion.firebaseapp.com",
+    projectId: "sdis05-gestion",
+    storageBucket: "sdis05-gestion.firebasestorage.app",
+    messagingSenderId: "785596693509",
+    appId: "1:785596693509:web:b98405268c1bc15f4ef06c"
+  };
+
+  // ✅ Initialise Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // ✅ Initialise Firestore
+  const db = firebase.firestore();
+</script>
+<script>
+  async function chargerVehicules() {
+    try {
+      const snapshot = await db.collection("vehicules").get();
+      vehicules = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      mettreAJourTableVehicules();
+    } catch (e) {
+      console.error("Erreur :", e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', chargerVehicules);
+</script>
+<script>
+  async function modifierVehiculeFirestore(id) {
+    const vehicule = {
+      indicatif: document.getElementById('indicatif').value,
+      type: document.getElementById('type').value,
+      marque: document.getElementById('marque').value,
+      modele: document.getElementById('modele').value,
+      annee: parseInt(document.getElementById('annee').value),
+      kilometrage: parseInt(document.getElementById('kilometrage').value),
+      statut: document.getElementById('statut').value,
+      caserne: document.getElementById('caserne').value
+    };
+
+    try {
+      await db.collection("vehicules").doc(id).update(vehicule);
+      alert('✅ Véhicule mis à jour dans Firestore !');
+
+      // Recharge la liste
+      chargerVehicules();
+
+      // Vide le formulaire
+      viderFormulaireVehicule();
+      
+      // Remet le bouton en mode "Ajouter"
+      document.getElementById('btn-ajouter-vehicule').onclick = ajouterVehicule;
+
+    } catch (e) {
+      console.error("❌ Erreur Firestore update :", e);
+    }
+  }
+</script>
+
 </body>
 </html>
